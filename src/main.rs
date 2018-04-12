@@ -1,7 +1,10 @@
 #[cfg(windows)] extern crate winapi;
 use std::io::Error;
+#[cfg(windows)]
 use winapi::um::tlhelp32::{Process32First, Process32Next, LPPROCESSENTRY32, CreateToolhelp32Snapshot, TH32CS_SNAPPROCESS, PROCESSENTRY32};
+#[cfg(windows)]
 use winapi::um::winnt::HANDLE;
+#[cfg(windows)]
 use winapi::um::handleapi::INVALID_HANDLE_VALUE;
 
 struct ProcessInformation {
@@ -15,6 +18,7 @@ impl ProcessInformation {
     }
 }
 
+#[cfg(windows)]
 struct ProcessInformationIterator {
     process_information: ProcessInformation,
     index: usize,
@@ -23,6 +27,7 @@ struct ProcessInformationIterator {
 
 }
 
+#[cfg(windows)]
 impl ProcessInformationIterator {
     fn new() -> ProcessInformationIterator {
         let h_process_snapshot: HANDLE = unsafe {
@@ -50,7 +55,7 @@ impl ProcessInformationIterator {
     }
 }
 
-
+#[cfg(windows)]
 impl Iterator for ProcessInformationIterator {
     type Item = ProcessInformation;
 
