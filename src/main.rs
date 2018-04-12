@@ -1,7 +1,9 @@
-extern crate proc_list;
 use std::io::Error;
+
 #[cfg(windows)]
-use proc_list::{ProcessInformationIterator};
+extern crate proc_list;
+#[cfg(windows)]
+use proc_list::utils::ProcessInformationIterator;
 
 #[cfg(windows)]
 fn print_message() -> Result<i32, Error> {
