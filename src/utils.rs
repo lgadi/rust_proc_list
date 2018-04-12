@@ -23,6 +23,10 @@ pub struct ProcessInformationIterator {
 
 }
 
+fn char_arr_to_string(chars  : &[i8]) -> String {
+    chars.into_iter().map(|c| { *c as u8 as char }).collect()
+}
+
 impl ProcessInformationIterator {
     pub fn new() -> ProcessInformationIterator {
         let h_process_snapshot: HANDLE = unsafe {
@@ -32,19 +36,24 @@ impl ProcessInformationIterator {
             panic!("Invalid handle value");
         }
         println!("Got process snapshot handle, moving on...");
+        let mut pe: PROCESSENTRY32;
         unsafe {
-            let mut pe: PROCESSENTRY32 = ::std::mem::zeroed();
-            let a = ::std::mem::size_of::<PROCESSENTRY32>();
-            let lppe: LPPROCESSENTRY32 = &mut pe;
-            (*lppe).dwSize = a as u32;
+            pe = ::std::mem::zeroed();
+        }
+        let a = ::std::mem::size_of::<PROCESSENTRY32>();
+
+        let lppe: LPPROCESSENTRY32 = &mut pe;
+        pe.dwSize = a as u32;
+        unsafe {
             let res = Process32First(h_process_snapshot, lppe);
             if res == 0 {
                 panic!("Can't get process list");
             }
-            let pid: u32 = (*lppe).th32ProcessID;
-            let process_name: String = (*lppe).szExeFile.into_iter().map(|c| { *c as u8 as char }).collect();
-            ProcessInformationIterator { process_information: ProcessInformation::new(pid, process_name), index: 0, process_snapshot: h_process_snapshot, process_entry: pe }
         }
+
+        let pid: u32 = pe.th32ProcessID;
+        let process_name: String = char_arr_to_string(&pe.szExeFile);
+        ProcessInformationIterator { process_information: ProcessInformation::new(pid, process_name), index: 0, process_snapshot: h_process_snapshot, process_entry: pe }
     }
 }
 
@@ -56,18 +65,20 @@ impl Iterator for ProcessInformationIterator {
         if self.index == 1 {
             return Some(ProcessInformation::new(self.process_information.pid, self.process_information.name.clone()));
         }
+
+        let mut pe = self.process_entry;
+        let lppe = &mut pe;
+        let res;
         unsafe {
-            let mut pe = self.process_entry;
-            let lppe = &mut pe;
             (*lppe).szExeFile = ::std::mem::zeroed();
-            let res = Process32Next(self.process_snapshot, lppe);
-            if res != 1 {
-                None
-            } else {
-                let pid: u32 = (*lppe).th32ProcessID;
-                let process_name: String = (*lppe).szExeFile.into_iter().map(|c| { *c as u8 as char }).collect();
-                Some(ProcessInformation::new(pid, process_name))
-            }
+            res = Process32Next(self.process_snapshot, lppe);
+        }
+        if res != 1 { // No more processes, finish the iteration
+            None
+        } else {
+            let pid: u32 = (*lppe).th32ProcessID;
+            let process_name: String = char_arr_to_string(&(*lppe).szExeFile);
+            Some(ProcessInformation::new(pid, process_name))
         }
     }
 }
