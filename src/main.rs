@@ -2,6 +2,7 @@ use std::io::Error;
 
 #[cfg(windows)]
 extern crate proc_list;
+
 #[cfg(windows)]
 use proc_list::utils::ProcessInformationIterator;
 
@@ -15,13 +16,14 @@ fn print_message() -> Result<i32, Error> {
 
 
     Ok(0)
-
 }
+
 #[cfg(not(windows))]
 fn print_message() -> Result<(), Error> {
     println!("Only works on Windows");
     Ok(())
 }
+
 fn main() {
     print_message().unwrap();
 }
