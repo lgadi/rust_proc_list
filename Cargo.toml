@@ -1,0 +1,8 @@
+[package]
+name = "proc_list"
+version = "0.1.0"
+authors = ["gadi <gadilif@gmail.com>"]
+
+[dependencies]
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["debug", "winuser", "tlhelp32", "handleapi"] }
