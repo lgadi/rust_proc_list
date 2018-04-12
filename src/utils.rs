@@ -1,8 +1,8 @@
 extern crate winapi;
 
-use winapi::um::tlhelp32::{Process32First, Process32Next, LPPROCESSENTRY32, CreateToolhelp32Snapshot, TH32CS_SNAPPROCESS, PROCESSENTRY32};
-use winapi::um::winnt::HANDLE;
-use winapi::um::handleapi::INVALID_HANDLE_VALUE;
+use utils::winapi::um::tlhelp32::{Process32First, Process32Next, LPPROCESSENTRY32, CreateToolhelp32Snapshot, TH32CS_SNAPPROCESS, PROCESSENTRY32};
+use utils::winapi::um::winnt::HANDLE;
+use utils::winapi::um::handleapi::INVALID_HANDLE_VALUE;
 
 pub struct ProcessInformation {
     pub pid: u32,
@@ -33,8 +33,8 @@ impl ProcessInformationIterator {
         }
         println!("Got process snapshot handle, moving on...");
         unsafe {
-            let mut pe: PROCESSENTRY32 = std::mem::zeroed();
-            let a = std::mem::size_of::<PROCESSENTRY32>();
+            let mut pe: PROCESSENTRY32 = ::std::mem::zeroed();
+            let a = ::std::mem::size_of::<PROCESSENTRY32>();
             let lppe: LPPROCESSENTRY32 = &mut pe;
             (*lppe).dwSize = a as u32;
             let res = Process32First(h_process_snapshot, lppe);
@@ -59,7 +59,7 @@ impl Iterator for ProcessInformationIterator {
         unsafe {
             let mut pe = self.process_entry;
             let lppe = &mut pe;
-            (*lppe).szExeFile = std::mem::zeroed();
+            (*lppe).szExeFile = ::std::mem::zeroed();
             let res = Process32Next(self.process_snapshot, lppe);
             if res != 1 {
                 None
