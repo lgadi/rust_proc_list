@@ -44,11 +44,9 @@ impl ProcessInformationIterator {
 
         let lppe: LPPROCESSENTRY32 = &mut pe;
         pe.dwSize = a as u32;
-        unsafe {
-            let res = Process32First(h_process_snapshot, lppe);
-            if res == 0 {
-                panic!("Can't get process list");
-            }
+        let res = unsafe { Process32First(h_process_snapshot, lppe) };
+        if res == 0 {
+            panic!("Can't get process list");
         }
 
         let pid: u32 = pe.th32ProcessID;
